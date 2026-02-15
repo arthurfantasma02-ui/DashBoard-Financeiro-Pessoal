@@ -2,19 +2,95 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financeiro Pessoal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Finance PRO | Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles/styles.css">
 </head>
-<body>
-    <header>
-         <h1 class="h1">Dashboard Financeiro Pessoal</h1>
-        <nav> </nav>
-    </header>
-    <main>
-       
-    </main>
-    <footer>Todos os direitos reservados.</footer>
-    
+<body class="dark-mode"> <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">Dashboard<span>Pessoal</span></div>
+            <nav>
+                <a href="javascript:void(0)" onclick="showSection('dashboard')">📊 Visão Geral</a>
+                <a href="javascript:void(0)" onclick="scrollToTransactions()">💸 Transações</a>
+                <a href="javascript:void(0)" onclick="showSection('sobre')">ℹ️ Sobre</a>
+            </nav>
+            <div class="theme-switch">
+                <button id="themeToggle" class="btn-theme">☀️ Alternar Tema</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="section-dashboard" class="content-section">
+                <header class="top-bar">
+                    <h1>Painel Financeiro</h1>
+                    <p id="currentDate"></p>
+                </header>
+
+                <section class="stats-grid">
+                    <div class="stat-card income"><h3>Receitas</h3><p id="income">R$ 0,00</p></div>
+                    <div class="stat-card expense"><h3>Despesas</h3><p id="expense">R$ 0,00</p></div>
+                    <div class="stat-card balance"><h3>Saldo</h3><p id="balance">R$ 0,00</p></div>
+                </section>
+
+                <div class="dashboard-body">
+                    <section class="chart-container Card">
+                        <h2>Análise de Fluxo</h2>
+                        <div style="height: 250px;"><canvas id="financeChart"></canvas></div>
+                    </section>
+
+                    <section class="form-container Card" id="area-lancamento">
+                        <h2>Novo Lançamento</h2>
+                        <form id="Form">
+                            <input type="number" id="valor" step="0.01" placeholder="Valor R$" required>
+                            <select id="categoria">
+                                <option value="salario">Salário</option>
+                                <option value="mercado">Mercado</option>
+                                <option value="contas">Contas</option>
+                                <option value="lazer">Lazer</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                            <select id="tipo">
+                                <option value="receita">Receita</option>
+                                <option value="despesa">Despesa</option>
+                            </select>
+                            <button type="submit" class="btn-add">Adicionar</button>
+                        </form>
+                    </section>
+                </div>
+
+                <section class="history-container Card" id="area-transacoes">
+                    <div class="history-header">
+                        <h2>Histórico</h2>
+                        <div class="filters">
+                            <select id="filterMonth">
+                                <option value="all">Todos os Meses</option>
+                                <option value="0">Janeiro</option>
+                                <option value="1">Fevereiro</option>
+                                <option value="2">Março</option>
+                                </select>
+                            <select id="filterCategory">
+                                <option value="all">Todas Categorias</option>
+                                <option value="salario">Salário</option>
+                                <option value="mercado">Mercado</option>
+                                <option value="contas">Contas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="transactionList"></div>
+                </section>
+            </div>
+
+            <div id="section-sobre" class="content-section" style="display: none;">
+                <div class="Card">
+                    <h1>Sobre o FinancePRO</h1>
+                    <p>Este dashboard foi desenvolvido para controle financeiro pessoal simplificado.</p>
+                    <p>Versão: 2.0 (Stable)</p>
+                    <button class="btn-add" style="width: auto; margin-top: 20px;" onclick="showSection('dashboard')">Voltar ao Painel</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="js/script.js"></script>
 </body>
 </html>
