@@ -1,5 +1,5 @@
 // ===============================
-// SELETORES
+// SELETORES GERAIS
 // ===============================
 const themeToggle = document.getElementById("themeToggle");
 const form = document.getElementById("Form");
@@ -7,10 +7,11 @@ const transactionList = document.getElementById("transactionList");
 let chart;
 
 // ===============================
-// FUNÇÃO PARA LIMPAR DADOS (ANTI-NaN)
+// GESTÃO DE DADOS (LIMPEZA ANTI-NaN)
 // ===============================
 function getCleanData() {
     const data = JSON.parse(localStorage.getItem("transactions")) || [];
+    // Filtra apenas valores válidos para evitar o erro NaN no gráfico/saldo
     return data
         .filter(t => !isNaN(t.valor) && t.valor !== null)
         .map(t => ({
@@ -22,19 +23,23 @@ function getCleanData() {
 let transactions = getCleanData();
 
 // ===============================
-// TEMA
+// TEMA (DARK / LIGHT)
 // ===============================
 themeToggle.addEventListener("click", () => {
     document.body.classList.toggle("light-mode");
     document.body.classList.toggle("dark-mode");
-    themeToggle.textContent =
-        document.body.classList.contains("light-mode")
-            ? "🌙 Modo Dark"
-            : "☀️ Modo Light";
+    
+    // Altera o texto do botão conforme o tema
+    themeToggle.textContent = document.body.classList.contains("light-mode") 
+        ? "🌙 Modo Dark" 
+        : "☀️ Modo Light";
+    
+    // Atualiza o gráfico para adaptar a cor da legenda
+    updateApp();
 });
 
 // ===============================
-// NAVEGAÇÃO
+// NAVEGAÇÃO E SCROLL
 // ===============================
 window.showSection = (id) => {
     document.querySelectorAll(".content-section").forEach(s => s.style.display = "none");
@@ -47,20 +52,22 @@ window.scrollToTransactions = () => {
 };
 
 // ===============================
-// ADICIONAR TRANSAÇÃO
+// ADICIONAR NOVA TRANSAÇÃO
 // ===============================
 form.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const valor = parseFloat(document.getElementById("valor").value);
+    const valorInput = document.getElementById("valor").value;
+    const valor = parseFloat(valorInput);
 
+    // Validação simples
     if (isNaN(valor) || valor <= 0) {
-        alert("Digite um valor válido.");
+        alert("Por favor, digite um valor maior que zero.");
         return;
     }
 
     const newTransaction = {
-        id: Date.now(),
+        id: Date.now(), // Gera ID único baseado no tempo
         valor: valor,
         categoria: document.getElementById("categoria").value,
         tipo: document.getElementById("tipo").value,
@@ -71,24 +78,36 @@ form.addEventListener("submit", (e) => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
 
     form.reset();
-    updateApp();
+    updateApp(); // Recalcula tudo
 });
 
 // ===============================
-// ATUALIZA TUDO
+// FUNÇÃO EXCLUIR TRANSAÇÃO
+// ===============================
+window.deleteTransaction = function(id) {
+    // Mantém apenas as transações que NÃO têm o ID clicado
+    transactions = transactions.filter(t => t.id !== id);
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    updateApp();
+};
+
+// ===============================
+// ATUALIZAÇÃO DA INTERFACE (Saldos e Gráfico)
 // ===============================
 function updateApp() {
-
     const filtered = applyFilters();
 
+    // Cálculo das Receitas
     const inc = transactions
         .filter(t => t.tipo === "receita")
         .reduce((acc, t) => acc + t.valor, 0);
 
+    // Cálculo das Despesas
     const exp = transactions
         .filter(t => t.tipo === "despesa")
         .reduce((acc, t) => acc + t.valor, 0);
 
+    // Atualiza os Cards de Valor
     document.getElementById("income").textContent = `R$ ${inc.toFixed(2)}`;
     document.getElementById("expense").textContent = `R$ ${exp.toFixed(2)}`;
     document.getElementById("balance").textContent = `R$ ${(inc - exp).toFixed(2)}`;
@@ -98,82 +117,71 @@ function updateApp() {
 }
 
 // ===============================
-// FILTROS
+// LÓGICA DE FILTROS
 // ===============================
 function applyFilters() {
     const month = document.getElementById("filterMonth").value;
     const cat = document.getElementById("filterCategory").value;
 
     return transactions.filter(t => {
-
-        const matchMonth =
-            month === "all" ||
-            new Date(t.date).getMonth() == month;
-
-        const matchCat =
-            cat === "all" ||
-            t.categoria === cat;
-
+        const matchMonth = month === "all" || new Date(t.date).getMonth() == month;
+        const matchCat = cat === "all" || t.categoria === cat;
         return matchMonth && matchCat;
     });
 }
 
 // ===============================
-// RENDERIZA LISTA + BOTÃO EXCLUIR
+// RENDERIZAÇÃO DA LISTA NO HTML
 // ===============================
 function renderList(data) {
-
     transactionList.innerHTML = "";
 
     if (data.length === 0) {
-        transactionList.innerHTML = "<p style='color:gray'>Nenhum dado para este filtro.</p>";
+        transactionList.innerHTML = "<p style='color:gray; padding:10px'>Nenhum registro encontrado.</p>";
         return;
     }
 
+    // .reverse() para mostrar a mais recente primeiro
     [...data].reverse().forEach(t => {
-
         const div = document.createElement("div");
         div.className = "transaction-item";
 
         div.innerHTML = `
             <div>
                 <strong>${t.categoria.toUpperCase()}</strong><br>
-                <small>${new Date(t.date).toLocaleDateString()}</small>
+                <small>${new Date(t.date).toLocaleDateString('pt-BR')}</small>
             </div>
-
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="color: ${t.tipo === 'receita' ? 'var(--green)' : 'var(--red)'}">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span style="color: ${t.tipo === 'receita' ? 'var(--green)' : 'var(--red)'}; font-weight:bold">
                     ${t.tipo === 'receita' ? '+' : '-'} R$ ${t.valor.toFixed(2)}
                 </span>
-                <button onclick="deleteTransaction(${t.id})"
-                    style="background:var(--red); border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">
-                    🗑
+                <button onclick="deleteTransaction(${t.id})" 
+                        style="background:none; border:none; cursor:pointer; font-size:1.1rem;" title="Excluir">
+                    🗑️
                 </button>
             </div>
         `;
-
         transactionList.appendChild(div);
     });
 }
 
 // ===============================
-// FUNÇÃO EXCLUIR
-// ===============================
-window.deleteTransaction = function(id) {
-
-    transactions = transactions.filter(t => t.id !== id);
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    updateApp();
-};
-
-// ===============================
-// GRÁFICO FUNCIONANDO
+// RENDERIZAÇÃO DO GRÁFICO (CHART.JS)
 // ===============================
 function renderChart(inc, exp) {
+    const canvas = document.getElementById("financeChart");
+    if (!canvas) return;
 
-    const ctx = document.getElementById("financeChart").getContext("2d");
+    const ctx = canvas.getContext("2d");
 
+    // Se o gráfico já existir, destrói para criar um novo (evita sobreposição)
     if (chart) chart.destroy();
+
+    // Se não houver dados, não desenha o gráfico
+    if (inc === 0 && exp === 0) return;
+
+    // Pega a cor do texto atual do CSS para a legenda
+    const textColor = getComputedStyle(document.body).getPropertyValue("--text");
 
     chart = new Chart(ctx, {
         type: "doughnut",
@@ -181,7 +189,9 @@ function renderChart(inc, exp) {
             labels: ["Receitas", "Despesas"],
             datasets: [{
                 data: [inc, exp],
-                backgroundColor: ["#22c55e", "#ef4444"]
+                backgroundColor: ["#22c55e", "#ef4444"],
+                borderWidth: 0,
+                hoverOffset: 10
             }]
         },
         options: {
@@ -190,10 +200,7 @@ function renderChart(inc, exp) {
             plugins: {
                 legend: {
                     position: window.innerWidth < 600 ? "bottom" : "right",
-                    labels: {
-                        color: getComputedStyle(document.body)
-                            .getPropertyValue("--text")
-                    }
+                    labels: { color: textColor, font: { size: 14 } }
                 }
             }
         }
@@ -201,12 +208,12 @@ function renderChart(inc, exp) {
 }
 
 // ===============================
-// EVENTOS FILTRO
+// ESCUTADORES DE EVENTOS DOS FILTROS
 // ===============================
 document.getElementById("filterMonth").addEventListener("change", updateApp);
 document.getElementById("filterCategory").addEventListener("change", updateApp);
 
 // ===============================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO AO CARREGAR
 // ===============================
 updateApp();

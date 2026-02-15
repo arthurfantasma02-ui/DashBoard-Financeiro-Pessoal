@@ -1,13 +1,18 @@
-/* 1. DEFINIÇÃO DE VARIÁVEIS (CORES E FONTES) */
+/* ============================================================
+   1. DEFINIÇÃO DE VARIÁVEIS (CORES E TEMAS)
+   ============================================================ */
+   
+/* Tema Escuro (Padrão) */
 .dark-mode {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --text: #f8fafc;
-    --text-dim: #94a3b8;
-    --border: #334155;
-    --input: #0f172a;
+    --bg: #0f172a;           /* Fundo da página */
+    --card: #1e293b;         /* Fundo dos cartões e sidebar */
+    --text: #f8fafc;         /* Cor do texto principal */
+    --text-dim: #94a3b8;     /* Cor de textos secundários */
+    --border: #334155;       /* Cor das bordas */
+    --input: #0f172a;        /* Fundo dos campos de entrada */
 }
 
+/* Tema Claro */
 .light-mode {
     --bg: #f1f5f9;
     --card: #ffffff;
@@ -17,22 +22,25 @@
     --input: #f8fafc;
 }
 
+/* Variáveis Globais (Não mudam com o tema) */
 :root {
-    --accent: #38bdf8;
-    --green: #23df3c;
-    --red: #ef4444;
-    --font-base: clamp(0.875rem, 0.5vw + 0.75rem, 1rem);
+    --accent: #38bdf8;       /* Azul destaque */
+    --green: #23df3c;       /* Verde para receitas */
+    --red: #ef4444;         /* Vermelho para despesas */
+    --font-base: clamp(0.875rem, 0.5vw + 0.75rem, 1rem); /* Fonte fluida */
     --sidebar-width: 260px;
 }
 
-/* 2. RESET E CONFIGURAÇÕES GERAIS */
+/* ============================================================
+   2. RESET E CONFIGURAÇÕES GERAIS
+   ============================================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Inter', system-ui, sans-serif;
     font-size: var(--font-base);
-    transition: background 0.3s, color 0.3s, border 0.3s;
+    transition: background 0.3s, color 0.3s, border 0.3s; /* Suaviza a troca de tema */
 }
 
 body {
@@ -41,7 +49,9 @@ body {
     overflow-x: hidden;
 }
 
-/* 3. LAYOUT ESTRUTURAL (GRID) */
+/* ============================================================
+   3. LAYOUT ESTRUTURAL (GRID)
+   ============================================================ */
 .app-container {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
@@ -49,7 +59,7 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* Menu Lateral */
 .sidebar {
     grid-area: aside;
     background: var(--card);
@@ -64,7 +74,7 @@ body {
 }
 
 .logo { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; }
-.logo span { color: var(--accent); font-size: 1.5rem; }
+.logo span { color: var(--accent); }
 
 .sidebar nav a {
     display: block;
@@ -75,9 +85,12 @@ body {
     margin-bottom: 8px;
 }
 
-.sidebar nav a:hover { background: var(--bg); color: var(--text); }
+.sidebar nav a:hover { 
+    background: var(--bg); 
+    color: var(--text); 
+}
 
-/* Conteúdo Principal */
+/* Área de Conteúdo Principal */
 .main-content {
     grid-area: main;
     padding: clamp(1rem, 3vw, 2.5rem);
@@ -86,7 +99,11 @@ body {
     margin: 0 auto;
 }
 
-/* 4. COMPONENTES DO DASHBOARD */
+/* ============================================================
+   4. COMPONENTES DO DASHBOARD
+   ============================================================ */
+
+/* Grades de Resumo (Cards de Saldo) */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -107,6 +124,7 @@ body {
 .income p { color: var(--green); }
 .expense p { color: var(--red); }
 
+/* Organização: Gráfico à esquerda, Form à direita */
 .dashboard-body {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
@@ -133,6 +151,7 @@ body {
 
 .filters { display: flex; gap: 10px; }
 
+/* Campos de Formulário */
 input, select {
     width: 100%;
     padding: 10px;
@@ -141,8 +160,12 @@ input, select {
     border: 1px solid var(--border);
     color: var(--text);
     border-radius: 8px;
+    outline: none;
 }
 
+input:focus { border-color: var(--accent); }
+
+/* Botão de Adicionar */
 .btn-add {
     width: 100%;
     padding: 12px;
@@ -154,19 +177,23 @@ input, select {
     cursor: pointer;
 }
 
+.btn-add:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* Item da Lista de Transação */
 .transaction-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 1rem;
     border-bottom: 1px solid var(--border);
 }
 
-/* 5. RESPONSIVIDADE (MEDIA QUERIES) */
+/* ============================================================
+   5. RESPONSIVIDADE (MEDIA QUERIES)
+   ============================================================ */
 
 @media (max-width: 1024px) {
-    .dashboard-body {
-        grid-template-columns: 1fr;
-    }
+    .dashboard-body { grid-template-columns: 1fr; } /* Empilha gráfico e form */
 }
 
 @media (max-width: 768px) {
@@ -175,6 +202,7 @@ input, select {
         grid-template-areas: "main";
     }
 
+    /* Sidebar vira Menu Inferior no Celular */
     .sidebar {
         position: fixed;
         bottom: 0;
@@ -188,9 +216,7 @@ input, select {
         border-top: 1px solid var(--border);
     }
 
-    .sidebar .logo, .sidebar .theme-switch, .sidebar .user-info {
-        display: none;
-    }
+    .sidebar .logo, .sidebar .theme-switch { display: none; }
 
     .sidebar nav {
         display: flex;
@@ -199,19 +225,12 @@ input, select {
         align-items: center;
     }
 
-    .sidebar nav a { margin-bottom: 0; padding: 10px; }
+    .sidebar nav a { margin-bottom: 0; padding: 10px; font-size: 0.8rem; }
 
-    .main-content {
-        padding-bottom: 90px;
-    }
+    .main-content { padding-bottom: 90px; }
 }
 
-@media (max-width: 480px) {
-    .stats-grid { grid-template-columns: 1fr; }
-    .history-header { flex-direction: column; align-items: stretch; }
-}
-
-/* Barra de rolagem */
+/* Estilo da Barra de Rolagem */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
